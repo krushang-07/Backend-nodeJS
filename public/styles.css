@@ -51,7 +51,7 @@ h1 {
 
 .contact-form button {
     width: 100%;
-    padding: 30px;
+    padding: 10px;
     border: none;
     background-color: #28a745;
     color: white;
@@ -63,4 +63,10 @@ h1 {
 
 .contact-form button:hover {
     background-color: #0c4f1b;
+}
+p{
+    color: red;
+    display: flex;
+    justify-content: flex-end;
+    margin: 5px;
 }

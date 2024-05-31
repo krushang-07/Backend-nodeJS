@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const bcrypt = require("bcrypt");
 
 //import mongoose from "mongoose";
 const app = express();
@@ -57,15 +58,21 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 // app.get("/home", (req, res) => {
-    
+
 // });
 
 //post req for login
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  let user = await User.findOne({ password });
+  let user = await User.findOne({ email });
   if (!user) return res.redirect("/register");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+//   console.log(isMatch);
+  if (!isMatch) {
+    return res.render("login", { email, message: "incorrect password" });
+  }
 
   const token = jwt.sign({ id: user._id }, "drhdrhsdgsedhsgsdgsg");
   res.cookie("token", token, {
@@ -83,8 +90,14 @@ app.post("/register", async (req, res) => {
   if (user) {
     return res.redirect("/login");
   }
+  const setRound = 10;
+  const hashedPassword = await bcrypt.hash(password, setRound);
 
-  user = await User.create({ name: name, email: email, password: password });
+  user = await User.create({
+    name: name,
+    email: email,
+    password: hashedPassword,
+  });
 
   const token = jwt.sign({ id: user._id }, "drhdrhsdgsedhsgsdgsg");
 
@@ -119,7 +132,7 @@ app.listen(5000, () => {
 
 // app.post("/contact", async (req, res) => {
 //   try {
-//     const { name, emai } = req.body;
+//     const { name, email } = req.body;
 //     await message.create({ name: name, email: email });
 //     res.redirect("/success");
 //   } catch {
