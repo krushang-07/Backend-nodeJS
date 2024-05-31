@@ -40,7 +40,7 @@ const isAuthenticated = async (req, res, next) => {
     const decoded = jwt.verify(token, "drhdrhsdgsedhsgsdgsg");
 
     //store  all user info for the access
-    req.users = await User.findById(decoded.id);
+    req.user = await User.findById(decoded.id);
     next();
   } else {
     res.redirect("/login");
@@ -48,7 +48,7 @@ const isAuthenticated = async (req, res, next) => {
 };
 
 app.get("/", isAuthenticated, (req, res) => {
-  res.render("logout", { name: req.users.name });
+  res.render("home", { name: req.user.name });
 });
 app.get("/register", (req, res) => {
   res.render("register");
@@ -56,33 +56,37 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("login");
 });
-app.get("/home", (req, res) => {
-  res.render("home");
-});
+// app.get("/home", (req, res) => {
+    
+// });
 
 //post req for login
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   let user = await User.findOne({ password });
-  if (!user) {
-    return res.redirect("/register");
-  } else {
-    return res.redirect("/home");
-  }
+  if (!user) return res.redirect("/register");
+
+  const token = jwt.sign({ id: user._id }, "drhdrhsdgsedhsgsdgsg");
+  res.cookie("token", token, {
+    httpOnly: true,
+    expires: new Date(Date.now() + 60 * 1000),
+  });
+
+  res.redirect("/");
 });
 
 //post req for register
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-  let users = await User.findOne({ email });
-  if (users) {
+  let user = await User.findOne({ email });
+  if (user) {
     return res.redirect("/login");
   }
 
-  users = await User.create({ name: name, email: email, password: password });
+  user = await User.create({ name: name, email: email, password: password });
 
-  const token = jwt.sign({ id: users._id }, "drhdrhsdgsedhsgsdgsg");
+  const token = jwt.sign({ id: user._id }, "drhdrhsdgsedhsgsdgsg");
 
   res.cookie("token", token, {
     httpOnly: true,
@@ -92,7 +96,7 @@ app.post("/register", async (req, res) => {
   res.redirect("/");
 });
 
-app.get("/logout", (req, res) => {
+app.get("/home", (req, res) => {
   res.cookie("token", null, {
     httpOnly: true,
     expires: new Date(Date.now()),

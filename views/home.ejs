@@ -1,11 +1,158 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>logout</title>
+  </head>
+  <body>
+    <form method="get" action="/home" class="contact-form">
+      <h1>hi,<%=name%></h1>
+      <br />
+      <h1>home page is here</h1>
+      <button type="submit">logout</button>
+    </form>
+  </body>
+</html> -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>homepage</title>
+    <title>Home Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .logout {
+        text-align: right;
+      }
+      .blog-post {
+        margin: 20px 0;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      pre {
+        background: #333;
+        color: #fff;
+        padding: 10px;
+        overflow-x: auto;
+      }
+    </style>
   </head>
   <body>
-    <h1>hellloooo home</h1>
+    <div class="container">
+      <div class="logout">
+        <form action="/home" method="get">
+          <button type="submit">Logout</button>
+        </form>
+      </div>
+      <h1>hi,<%=name%></h1>
+      <br />
+      <h1>Welcome to the Home Page</h1>
+
+      <div class="blog-post">
+        <h2>Understanding Authentication in Express with JWT and Bcrypt</h2>
+        <p>
+          Authentication is a crucial aspect of web development. In this blog,
+          we will cover the basics of setting up authentication in an Express
+          application using JSON Web Tokens (JWT) and bcrypt for password
+          hashing.
+        </p>
+
+        <h3>Setting up Express</h3>
+        <p>
+          First, we need to set up an Express application. You can do this by
+          running the following commands:
+        </p>
+        <pre><code>npm init -y
+npm install express jsonwebtoken bcryptjs body-parser</code></pre>
+
+        <h3>Creating User Model</h3>
+        <p>
+          We will need a User model to represent users in our application. For
+          simplicity, we'll use an array to store users:
+        </p>
+        <pre><code>const users = [];</code></pre>
+
+        <h3>Register Route</h3>
+        <p>Next, we create a registration route where users can sign up:</p>
+        <pre><code>const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.json());
+
+app.post('/register', async (req, res) => {
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ username, password: hashedPassword });
+    res.status(201).send('User registered');
+});
+
+app.listen(3000, () => console.log('Server running on port 3000'));</code></pre>
+
+        <h3>Login Route</h3>
+        <p>
+          We also need a login route to authenticate users and issue JWT tokens:
+        </p>
+        <pre><code>app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    const user = users.find(u => u.username === username);
+    if (user && await bcrypt.compare(password, user.password)) {
+        const token = jwt.sign({ username }, 'your_jwt_secret');
+        res.json({ token });
+    } else {
+        res.status(401).send('Invalid credentials');
+    }
+});</code></pre>
+
+        <h3>Protecting Routes</h3>
+        <p>Finally, we protect certain routes by verifying the JWT token:</p>
+        <pre><code>const authenticateJWT = (req, res, next) => {
+    const token = req.header('Authorization');
+    if (token) {
+        jwt.verify(token, 'your_jwt_secret', (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+            req.user = user;
+            next();
+        });
+    } else {
+        res.sendStatus(401);
+    }
+};
+
+app.get('/protected', authenticateJWT, (req, res) => {
+    res.send('This is a protected route');
+});</code></pre>
+
+        <p>
+          And that's a basic overview of setting up authentication in an Express
+          application using JWT and bcrypt!
+        </p>
+      </div>
+    </div>
   </body>
 </html>
